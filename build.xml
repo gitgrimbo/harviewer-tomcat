@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+
+<!--
+Sets up the harviewer-tomcat webapp.
+-->
+<project name="harviewer-tomcat" basedir="." default="build">
+
+  <!-- Import the environment variables -->
+  <property environment="env" />
+
+  <property name="tomcat.home" value="${env.CATALINA_HOME}" />
+
+
+
+
+
+  <!--
+  OVERRIDES.
+
+  Override these values from the Ant command line (or leave them as the following defaults).
+  -->
+
+  <!--
+  The path to the harviewer Git repo/application.
+  The default assumes the harviewer repo is in a sibling folder called "harviewer".
+  Use location attribute to convert possible relative path to absolute.
+  -->
+  <property name="harviewer.folder" value="${basedir}/../harviewer" />
+  <property name="quercus.version" value="4.0.39" />
+
+  <!--
+  /OVERRIDES.
+  -->
+
+
+
+
+
+  <!--
+  INTERNAL PROPERTIES.
+  -->
+  <property name="harviewer.folder.absolute" location="${harviewer.folder}" />
+  <property name="temp.folder" value="${basedir}/temp" />
+  <property name="webapp.folder" value="${basedir}/webapps/ROOT" />
+  <property name="webapp.context.file" value="${webapp.folder}/META-INF/context.xml" />
+  <property name="quercus.war.filename" value="quercus-${quercus.version}.war" />
+  <property name="quercus.war.url" value="http://caucho.com/download/${quercus.war.filename}" />
+  <property name="servlet-api.jar" value="${tomcat.home}\lib\servlet-api.jar" />
+
+  <!--
+  /INTERNAL PROPERTIES.
+  -->
+
+
+
+
+
+  <!--
+  -->
+  <target name="clean">
+    <delete dir="${temp.folder}" />
+  </target>
+
+
+  <!--
+  Downloads the Quercus war (if it doesn't already exist in the temp folder).
+  -->
+  <target name="get-quercus-war">
+    <mkdir dir="${temp.folder}" />
+    <get dest="${temp.folder}" skipexisting="true" verbose="true">
+      <url url="${quercus.war.url}" />
+    </get>
+  </target>
+
+  <!--
+  Unzips the Quercus war, copies the quercus.jar into the webapp, and compiles the modified QuercusServletImpl class.
+  -->
+  <target name="prepare-quercus-webapp" depends="get-quercus-war">
+    <unzip src="${temp.folder}/${quercus.war.filename}" dest="${temp.folder}" />
+
+    <mkdir dir="${webapp.folder}/WEB-INF/classes" />
+    <mkdir dir="${webapp.folder}/WEB-INF/lib" />
+
+    <copy file="${temp.folder}/WEB-INF/lib/quercus.jar" todir="${webapp.folder}/WEB-INF/lib" />
+
+    <javac srcdir="${basedir}/src" destdir="${webapp.folder}/WEB-INF/classes" classpath="${webapp.folder}/WEB-INF/lib/quercus.jar;${servlet-api.jar}" source="1.7" />
+
+    <replace file="${webapp.context.file}" token="PATH_TO_HARVIEWER" value="${harviewer.folder.absolute}" />
+  </target>
+
+
+  <target name="build" depends="prepare-quercus-webapp" />
+
+</project>
