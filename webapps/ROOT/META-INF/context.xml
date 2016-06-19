@@ -1,2 +1,0 @@
-<Context reloadable="true" aliases="/webapp=PATH_TO_HARVIEWER\webapp,/webapp-build=PATH_TO_HARVIEWER\webapp-build,/selenium=PATH_TO_HARVIEWER\selenium,/tests=PATH_TO_HARVIEWER\tests,/node_modules=PATH_TO_HARVIEWER\node_modules">
-</Context>

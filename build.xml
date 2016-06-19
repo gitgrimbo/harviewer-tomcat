@@ -42,10 +42,19 @@ Sets up the harviewer-tomcat webapp.
   <property name="harviewer.folder.absolute" location="${harviewer.folder}" />
   <property name="temp.folder" value="${basedir}/temp" />
   <property name="webapp.folder" value="${basedir}/webapps/ROOT" />
+  <property name="webapp.context.template" value="${basedir}/src/templates/context.xml" />
   <property name="webapp.context.file" value="${webapp.folder}/META-INF/context.xml" />
+  <property name="web.xml.template" value="${basedir}/src/templates/web.xml" />
   <property name="quercus.war.filename" value="quercus-${quercus.version}.war" />
   <property name="quercus.war.url" value="http://caucho.com/download/${quercus.war.filename}" />
   <property name="servlet-api.jar" value="${tomcat.home}\lib\servlet-api.jar" />
+
+  <!-- For UrlRewriteFilter proxy -->
+  <property name="urlrewrite.template" value="${basedir}/src/templates/urlrewrite.xml" />
+  <loadfile property="urlrewrite.web.xml" srcFile="${basedir}/src/templates/urlrewrite.web.xml" />
+  <property name="commons-httpclient.jar" value="https://repo1.maven.org/maven2/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar" />
+  <property name="commons-codec.jar" value="https://repo1.maven.org/maven2/commons-codec/commons-codec/1.2/commons-codec-1.2.jar" />
+  <property name="commons-logging.jar" value="https://repo1.maven.org/maven2/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar" />
 
   <!--
   /INTERNAL PROPERTIES.
@@ -82,13 +91,42 @@ Sets up the harviewer-tomcat webapp.
     <mkdir dir="${webapp.folder}/WEB-INF/lib" />
 
     <copy file="${temp.folder}/WEB-INF/lib/quercus.jar" todir="${webapp.folder}/WEB-INF/lib" />
+    <copy file="${web.xml.template}" todir="${webapp.folder}/WEB-INF" />
 
-    <javac srcdir="${basedir}/src" destdir="${webapp.folder}/WEB-INF/classes" classpath="${webapp.folder}/WEB-INF/lib/quercus.jar;${servlet-api.jar}" source="1.7" />
+    <javac srcdir="${basedir}/src/java" destdir="${webapp.folder}/WEB-INF/classes" classpath="${webapp.folder}/WEB-INF/lib/quercus.jar;${servlet-api.jar}" source="1.7" />
 
+    <copy file="${webapp.context.template}" tofile="${webapp.context.file}" overwrite="true" />
     <replace file="${webapp.context.file}" token="PATH_TO_HARVIEWER" value="${harviewer.folder.absolute}" />
   </target>
 
+  <!--
+  Downloads the JARs necessary for proxying requests on to the Intern Proxy.
+  -->
+  <target name="get-proxy-jars">
+    <mkdir dir="${temp.folder}" />
+    <get dest="${webapp.folder}/WEB-INF/lib" skipexisting="true" verbose="true">
+      <url url="${commons-httpclient.jar}" />
+    </get>
+    <get dest="${webapp.folder}/WEB-INF/lib" skipexisting="true" verbose="true">
+      <url url="${commons-codec.jar}" />
+    </get>
+    <get dest="${webapp.folder}/WEB-INF/lib" skipexisting="true" verbose="true">
+      <url url="${commons-logging.jar}" />
+    </get>
+  </target>
 
-  <target name="build" depends="prepare-quercus-webapp" />
+  <!--
+  Setup the webapp to proxy through JS files to Intern.
+  Only if the "proxy" property is set.
+  -->
+  <target name="setup-proxy" depends="get-proxy-jars" if="proxy">
+    <copy file="${urlrewrite.template}" todir="${webapp.folder}/WEB-INF" overwrite="true" />
+    
+    <replace file="${webapp.folder}/WEB-INF/web.xml" value="${urlrewrite.web.xml}">
+      <replacetoken><![CDATA[<!--UrlRewriteFilter.placeholder-->]]></replacetoken>
+    </replace>
+  </target>
+
+  <target name="build" depends="prepare-quercus-webapp, setup-proxy" />
 
 </project>

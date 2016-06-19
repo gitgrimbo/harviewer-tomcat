@@ -1,5 +1,11 @@
+# Temp/work/build files
 logs/
 temp/
 work/
-**/WEB-INF/lib/
-**/WEB-INF/classes/
+webapps/ROOT/WEB-INF/lib/
+webapps/ROOT/WEB-INF/classes/
+
+# Will be copied here from a template, if proxy is used
+webapps/ROOT/WEB-INF/urlrewrite.xml
+webapps/ROOT/WEB-INF/web.xml
+webapps/ROOT/META-INF/context.xml

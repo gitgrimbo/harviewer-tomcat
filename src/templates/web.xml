@@ -6,6 +6,8 @@
 <web-app>
   <description>Caucho Technology's PHP Implementation</description>
 
+<!--UrlRewriteFilter.placeholder-->
+
   <servlet>
     <servlet-name>Quercus Servlet</servlet-name>
     <servlet-class>com.caucho.quercus.servlet.QuercusServlet</servlet-class>
@@ -37,7 +39,7 @@
       <param-value>WEB-INF/php.ini</param-value>
     </init-param>
     -->
-    
+
     <!--
       Location of the license to enable php to java compilation.
     -->
