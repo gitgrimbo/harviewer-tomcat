@@ -117,9 +117,9 @@ Sets up the harviewer-tomcat webapp.
 
   <!--
   Setup the webapp to proxy through JS files to Intern.
-  Only if the "proxy" property is set.
+  Only if the "harviewer.tomcat.proxy" property is set.
   -->
-  <target name="setup-proxy" depends="get-proxy-jars" if="proxy">
+  <target name="setup-proxy" depends="get-proxy-jars" if="harviewer.tomcat.proxy">
     <copy file="${urlrewrite.template}" todir="${webapp.folder}/WEB-INF" overwrite="true" />
     
     <replace file="${webapp.folder}/WEB-INF/web.xml" value="${urlrewrite.web.xml}">

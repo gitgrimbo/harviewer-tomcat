@@ -88,9 +88,9 @@ E.g. replace `PATH_TO_HARVIEWER` with the path to your clone of the HAR Viewer r
 
 # Using proxy for Intern code coverage
 
-Use the "proxy" property when building.
+Use the `harviewer.tomcat.proxy` property when building.
 
-    ant -Dharviewer.folder=../harviewer2 -Dproxy=true
+    ant -Dharviewer.folder=../harviewer2 -Dharviewer.tomcat.proxy=true
 
 This will download [UrlRewriteFilter](cdn.rawgit.com/paultuckey/urlrewritefilter/master/src/doc/manual/4.0/index.html)
 and its dependencies, and use the following rule to proxy HAR Viewer webapp JS requests to the Intern proxy (which will perform code coverage).
