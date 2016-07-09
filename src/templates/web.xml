@@ -6,7 +6,8 @@
 <web-app>
   <description>Caucho Technology's PHP Implementation</description>
 
-<!--UrlRewriteFilter.placeholder-->
+<!--harviewer.tomcat.proxy.placeholder-->
+<!--harviewer.tomcat.cors.placeholder-->
 
   <servlet>
     <servlet-name>Quercus Servlet</servlet-name>

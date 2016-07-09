@@ -102,3 +102,70 @@ and its dependencies, and use the following rule to proxy HAR Viewer webapp JS r
     </rule>
 
 You should use the appropriate `excludeInstrumentation` config for Intern so that you only instrument your JS files, and not library files (e.g. jQuery, etc).
+
+
+
+
+
+# Using CORS
+
+Use the `harviewer.tomcat.cors` property when building.
+
+    ant -Dharviewer.folder=../harviewer2 -Dharviewer.tomcat.cors=true
+
+This will download the [eBay CORS filter](https://github.com/eBay/cors-filter/) from Maven, and use the following config:
+
+- `cors.allowed.origins=*` (allow all origins)
+- `cors.support.credentials=false` (cookies are not necessary)
+- `<url-pattern>*.har</url-pattern>` (only allow CORS for HAR resources)
+
+````xml
+<filter>
+  <filter-name>CORS Filter</filter-name>
+  <filter-class>org.ebaysf.web.cors.CORSFilter</filter-class>
+  <init-param>
+    <description>A comma separated list of allowed origins. Note: An '*' cannot be used for an allowed origin when using credentials.</description>
+    <param-name>cors.allowed.origins</param-name>
+    <param-value>*</param-value>
+  </init-param>
+  <init-param>
+    <description>A comma separated list of HTTP verbs, using which a CORS request can be made.</description>
+    <param-name>cors.allowed.methods</param-name>
+    <param-value>GET,POST,HEAD,OPTIONS,PUT</param-value>
+  </init-param>
+  <init-param>
+    <description>A comma separated list of allowed headers when making a non simple CORS request.</description>
+    <param-name>cors.allowed.headers</param-name>
+    <param-value>Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers</param-value>
+  </init-param>
+  <init-param>
+    <description>A comma separated list non-standard response headers that will be exposed to XHR2 object.</description>
+    <param-name>cors.exposed.headers</param-name>
+    <param-value></param-value>
+  </init-param>
+  <init-param>
+    <description>A flag that suggests if CORS is supported with cookies</description>
+    <param-name>cors.support.credentials</param-name>
+    <param-value>false</param-value>
+  </init-param>
+  <init-param>
+    <description>A flag to control logging</description>
+    <param-name>cors.logging.enabled</param-name>
+    <param-value>true</param-value>
+  </init-param>
+  <init-param>
+    <description>Indicates how long (in seconds) the results of a preflight request can be cached in a preflight result cache.</description>
+    <param-name>cors.preflight.maxage</param-name>
+    <param-value>10</param-value>
+  </init-param>
+</filter>
+<filter-mapping>
+  <filter-name>CORS Filter</filter-name>
+  <url-pattern>*.har</url-pattern>
+</filter-mapping>
+````
+
+Now URLs such as the following can be used:
+
+- [http://harviewer:49002/webapp/?path=http://harviewer:49001/selenium/tests/hars/issue-23/images.har](#)
+- [http://www.softwareishard.com/har/viewer/?path=http://harviewer:49001/selenium/tests/hars/issue-23/images.har](#)

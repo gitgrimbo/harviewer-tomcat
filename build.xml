@@ -56,6 +56,10 @@ Sets up the harviewer-tomcat webapp.
   <property name="commons-codec.jar" value="https://repo1.maven.org/maven2/commons-codec/commons-codec/1.2/commons-codec-1.2.jar" />
   <property name="commons-logging.jar" value="https://repo1.maven.org/maven2/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar" />
 
+  <!-- For CORS -->
+  <loadfile property="cors.web.xml" srcFile="${basedir}/src/templates/cors.web.xml" />
+  <property name="cors-filter.jar" value="https://repo1.maven.org/maven2/org/ebaysf/web/cors-filter/1.0.1/cors-filter-1.0.1.jar" />
+
   <!--
   /INTERNAL PROPERTIES.
   -->
@@ -90,12 +94,12 @@ Sets up the harviewer-tomcat webapp.
     <mkdir dir="${webapp.folder}/WEB-INF/classes" />
     <mkdir dir="${webapp.folder}/WEB-INF/lib" />
 
-    <copy file="${temp.folder}/WEB-INF/lib/quercus.jar" todir="${webapp.folder}/WEB-INF/lib" />
-    <copy file="${web.xml.template}" todir="${webapp.folder}/WEB-INF" />
+    <copy overwrite="true" file="${temp.folder}/WEB-INF/lib/quercus.jar" todir="${webapp.folder}/WEB-INF/lib" />
+    <copy overwrite="true" file="${web.xml.template}" todir="${webapp.folder}/WEB-INF" />
 
     <javac srcdir="${basedir}/src/java" destdir="${webapp.folder}/WEB-INF/classes" classpath="${webapp.folder}/WEB-INF/lib/quercus.jar;${servlet-api.jar}" source="1.7" />
 
-    <copy file="${webapp.context.template}" tofile="${webapp.context.file}" overwrite="true" />
+    <copy overwrite="true" file="${webapp.context.template}" tofile="${webapp.context.file}" />
     <replace file="${webapp.context.file}" token="PATH_TO_HARVIEWER" value="${harviewer.folder.absolute}" />
   </target>
 
@@ -120,13 +124,30 @@ Sets up the harviewer-tomcat webapp.
   Only if the "harviewer.tomcat.proxy" property is set.
   -->
   <target name="setup-proxy" depends="get-proxy-jars" if="harviewer.tomcat.proxy">
-    <copy file="${urlrewrite.template}" todir="${webapp.folder}/WEB-INF" overwrite="true" />
-    
+    <copy overwrite="true" file="${urlrewrite.template}" todir="${webapp.folder}/WEB-INF" />
     <replace file="${webapp.folder}/WEB-INF/web.xml" value="${urlrewrite.web.xml}">
-      <replacetoken><![CDATA[<!--UrlRewriteFilter.placeholder-->]]></replacetoken>
+      <replacetoken><![CDATA[<!--harviewer.tomcat.proxy.placeholder-->]]></replacetoken>
     </replace>
   </target>
 
-  <target name="build" depends="prepare-quercus-webapp, setup-proxy" />
+  <!--
+  Downloads the JARs necessary for CORS.
+  -->
+  <target name="get-cors-jars">
+    <mkdir dir="${temp.folder}" />
+    <get dest="${webapp.folder}/WEB-INF/lib" skipexisting="true" verbose="true">
+      <url url="${cors-filter.jar}" />
+    </get>
+  </target>
+
+  <!--
+  -->
+  <target name="setup-cors" depends="get-cors-jars" if="harviewer.tomcat.cors">
+    <replace file="${webapp.folder}/WEB-INF/web.xml" value="${cors.web.xml}">
+      <replacetoken><![CDATA[<!--harviewer.tomcat.cors.placeholder-->]]></replacetoken>
+    </replace>
+  </target>
+
+  <target name="build" depends="prepare-quercus-webapp, setup-proxy, setup-cors" />
 
 </project>
